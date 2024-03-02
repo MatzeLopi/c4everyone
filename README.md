@@ -1,3 +1,4 @@
 # Learning C
 
-Learning c is a repo where I experiment with c++ code. This is a learning repo, so the code is most likely nothing special or anything that has never been seen but it is authentic.
+In this repo I document the coursework from Coursera I have done. I am currently doing the course:
+https://www.coursera.org/specializations/coding-for-everyone to learn c.
