@@ -11,7 +11,7 @@ int main(void)
     int i, n, num;
     double sum = 0.0;
 
-    myFile = fopen("/home/matthias/WS_all/C/c4everyone/week5/elephant_seal_data.txt", "r");
+    myFile = fopen("/home/matthias/WS_all/learning_c/c4everyone/week5/elephant_seal_data.txt", "r");
 
     // Check if file was opened successfully
     if (myFile == NULL)
