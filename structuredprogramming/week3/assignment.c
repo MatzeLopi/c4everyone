@@ -7,7 +7,7 @@ Task:
     - Create first 10 elements from terminal input as a linked list
     - Print data in nice and readable way
 
-Last edited: 11/MAR/2024
+Last edited: 13/MAR/2024
 */
 
 #include <stdio.h>
@@ -16,9 +16,9 @@ Last edited: 11/MAR/2024
 // Typedef of an periodic element
 typedef struct element
 {
-    char *name;
+    char name[20];
+    char symbol[3];
     float weight;
-    char symbol;
 } element;
 
 // Typdef of a list of periodic elements
@@ -45,41 +45,54 @@ list *prepend(element data, list *linked_list)
 {
     list *new_head = create_list(data);
     new_head->next = linked_list;
+    return new_head;
+}
+
+void print_list(list *element_list)
+{
+    printf("Element \t| Symbol \t| Weight\n");
+    while (element_list != NULL)
+    {
+        element data = element_list->data_;
+        printf("%s \t|%s \t\t|%f \n", data.name, data.symbol, data.weight);
+        element_list = element_list->next;
+    }
 }
 
 // Main function
 int main(void)
 {
-    int number_elements;
     int i = 0;
+    int number_elements;
+    list *element_list = NULL;
+
+    // Ask user for input
     printf("How many periodic elements should be created?\n");
     scanf("%d", &number_elements);
 
+    // Get as many elements as defined
     while (i < number_elements)
     {
-        float weight;
-        char symbol;
-        char *name;
-        printf("\n Please input name, symbol and weight for the %d element.\n Seperate with ','.\n", i);
 
-        scanf("%s, %c, %f", name, &symbol, &weight);
-        element new_element = {
-            name,
-            symbol,
-            weight,
-        };
-        if (i == 0)
-        {
-            list *list = create_list(new_element);
-        }
-        else
-        {
-            list *list = prepend(new_element, list);
-        };
+        element new_element;
+
+        // Get name
+        printf("Please input name for the %d element.\n", i);
+        scanf("%s", new_element.name);
+
+        // Get symbol
+        printf("Please input symbol for %s.\n", new_element.name);
+        scanf("%2s", new_element.symbol);
+
+        // Get weight
+        printf("Please input weight for the %s\n", new_element.name);
+        scanf("%f", &new_element.weight);
+
+        element_list = prepend(new_element, element_list);
 
         i++;
     }
-    printf("Success");
+    print_list(element_list);
 
     return 0;
 }
