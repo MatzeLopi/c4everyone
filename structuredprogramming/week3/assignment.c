@@ -22,33 +22,33 @@ typedef struct element
 } element;
 
 // Typdef of a list of periodic elements
-typedef struct list
+typedef struct node
 {
     element data_;
-    struct list *next;
-} list;
+    struct node *next;
+} node;
 
 // Function to check if list is empty
-int is_empty(const list *l) { return (l == NULL); }
+int is_empty(const node *l) { return (l == NULL); }
 
 // Function to create a list element
-list *create_list(element data)
+node *create_list(element data)
 {
-    list *head = malloc(sizeof(list));
+    node *head = malloc(sizeof(node));
     head->data_ = data;
     head->next = NULL;
     return head;
 }
 
 // Function to link a list
-list *prepend(element data, list *linked_list)
+node *prepend(element data, node *linked_list)
 {
-    list *new_head = create_list(data);
+    node *new_head = create_list(data);
     new_head->next = linked_list;
     return new_head;
 }
 
-void print_list(list *element_list)
+void print_list(node *element_list)
 {
     printf("%-20s|%-20s|%-20s\n", "Element", "Symbol", "Weight");
     printf("--------------------------------------------------\n");
@@ -65,7 +65,7 @@ int main(void)
 {
     int i = 0;
     int number_elements;
-    list *element_list = NULL;
+    node *element_list = NULL;
 
     // Ask user for input
     printf("How many periodic elements should be created?\n");
