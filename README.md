@@ -29,3 +29,13 @@ Is the second part of the course which goes a bit deeper into the c language.
 
 ## C++ for C Programmers A + B
 In this section I will summarize the third and fourth part of the course
+
+### Week 1
+
+### Week 2
+
+### Week 3
+
+### Week 4
+
+### Week 5
