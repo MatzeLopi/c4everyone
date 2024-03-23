@@ -8,15 +8,9 @@ using namespace std;
 class point
 {
 public:
-    // Default constructor
-    point() { x = y = 0; }
+    // Constructor wit initializer list
+    point(double x = 0.0, double y = 0.0) : x(x), y(y) {}
 
-    // Constructor
-    point(double x_val, double y_val)
-    {
-        x = x_val;
-        y = y_val;
-    }
     double getx() { return x; }
     void setx(double value) { x = value; }
     double gety() { return y; }
@@ -25,9 +19,6 @@ public:
     friend point operator+(const point &p1, const point &p2);
     friend point operator-(const point &p1, const point &p2);
     friend ostream &operator<<(ostream &out, const point &p);
-
-    // Destructor
-    ~point() {}
 
 private:
     double x, y;
@@ -72,6 +63,7 @@ substractable subs(const substractable data[], int size, substractable s = 0)
     return s;
 }
 
+// Template for miltiplying all values in an array
 template <class multiplyable>
 multiplyable multi(const multiplyable data[], int size, multiplyable s = 1)
 {
@@ -90,7 +82,9 @@ int main()
     cout << multi(array, size) << endl;
 
     point p1 = {1, 2};
+    cout << p1 << endl;
     point p2 = {2, 3};
+    cout << p2 << endl;
 
     point p3 = p1 + p2;
     cout << p3 << endl;
