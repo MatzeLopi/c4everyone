@@ -12,8 +12,8 @@ The C and C++ Programming Specialization provided a comprehensive introduction t
 
 ## Repository Contents
 
-- **Assignments:** This directory contains my solutions to the programming assignments provided throughout the specialization.
-- **Projects:** Here, you'll find the projects I completed as part of the specialization, demonstrating my understanding of key concepts.
+- **Fundamentals:** Here you will find my solutions to the assignments of the first course in the series, fundamentals.
+- **StructuredProgramming :** Here you will find my solutions to the assignments of the second course in the series, structured programming.
 
 Feel free to explore the contents of this repository and learn alongside me. If you have any questions, suggestions, or feedback, don't hesitate to reach out. Let's continue learning and growing together!
 
