@@ -20,6 +20,8 @@ public:
     friend point operator-(const point &p1, const point &p2);
     friend ostream &operator<<(ostream &out, const point &p);
 
+    ~point() {}
+
 private:
     double x, y;
 };

@@ -14,6 +14,7 @@ The C and C++ Programming Specialization provided a comprehensive introduction t
 
 - **Fundamentals:** Here you will find my solutions to the assignments of the first course in the series, fundamentals.
 - **StructuredProgramming :** Here you will find my solutions to the assignments of the second course in the series, structured programming.
+- **Cpp4cdev:** Here you will find my solutions and notes of the third and fourth course in the series.
 
 Feel free to explore the contents of this repository and learn alongside me. If you have any questions, suggestions, or feedback, don't hesitate to reach out. Let's continue learning and growing together!
 
@@ -115,11 +116,6 @@ In Week 3, we explored linked lists and their manipulation, along with an introd
 - Understanding binary search trees (BSTs) and their properties.
 - Implementing BSTs in C and performing common operations such as insertion, deletion, and traversal.
 
-#### Binary Search Trees:
-
-- Introduction to binary search trees (BSTs) and their properties.
-- Implementing BSTs in C and performing common operations such as insertion, deletion, and traversal.
-
 ### Week 4: File I/O and Command Line Arguments
 
 In Week 4, we focused on two important topics: File I/O and working with command line arguments (`argc` and `argv`). Here's what we covered:
@@ -145,11 +141,25 @@ In Week 4, we focused on two important topics: File I/O and working with command
 
 ## C++ for C Programmers A + B
 
-In this section I will summarize the third and fourth part of the course
+In this section, I'll summarize the third and fourth parts of the course, which focus on transitioning from C to C++, leveraging object-oriented programming (OOP) concepts, and exploring the advancements and improvements offered by C++ over C. Let's dive into the details:
 
-### Week 1
+### Week 1: Introduction to C++
+
+In Week 1, we delved into the following key topics:
+
+- Introduction to Object-Oriented Programming (OOP) concepts.
+- Conversion of C code to C++.
+- Highlighting the significant differences and improvements of C++ over C.
 
 ### Week 2
+
+In Week 2, we explored the following topics:
+
+- Introduction to classes in C++ including constructors and destructors.
+- Understanding the concept of operator overloading and its implementation in C++.
+- Exploring the concept of generic functions and their usage in C++ programming.
+- Learning about enums in C++ and how they provide a way to define a set of named integral constants representing enumerators.
+- An introductory session on graph theory, its significance, and basic concepts.
 
 ### Week 3
 
