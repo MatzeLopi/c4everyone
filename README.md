@@ -1,6 +1,6 @@
 # Coding for Everyone, C and C ++
 
-Welcome to my GitHub repository for the C and C++ Programming Specialization offered by the University of California, Irvine on Coursera. In this repository, you'll find my completed assignments, projects, and notes from the courses.
+Welcome to my GitHub repository for the C and C++ Programming Specialization offered by the University of California, Irvine on Coursera. In this repository, you'll find my completed assignments, projects and some sparse notes.
 
 ## Motivation
 
