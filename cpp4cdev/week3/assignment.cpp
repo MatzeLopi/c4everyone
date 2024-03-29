@@ -4,6 +4,7 @@
 #include <iostream>
 #include <random>
 #include <iomanip>
+#include <algorithm>
 #include <map>
 
 using namespace std;
@@ -23,6 +24,9 @@ public:
     // Default constructor
     Vertex(int id, double data = 0.0) : id(id), data(data) {}
 
+    // Friend function to overload the << operator
+    friend ostream &operator<<(ostream &os, const Vertex &v);
+
     // Getter for id
     int get_id() const
     {
@@ -34,6 +38,43 @@ private:
     int id;
 };
 
+// Print operator overload for Vertex
+ostream &operator<<(ostream &os, const Vertex &v)
+{
+    os << "Vertex: " << v.get_id() << " Data: " << v.data;
+    return os;
+}
+// Edge class
+class Edge
+{
+public:
+    // Constructor
+    Edge(Vertex start, Vertex end, double weight) : start(start), end(end), weight(weight) {}
+
+    // Getter for start vertex
+    Vertex get_start()
+    {
+        return start;
+    }
+
+    // Getter for end vertex
+    Vertex get_end()
+    {
+        return end;
+    }
+
+    // Getter for weight
+    double get_weight()
+    {
+        return weight;
+    }
+
+private:
+    Vertex start;
+    Vertex end;
+    double weight;
+};
+
 // Graph class
 class Graph
 {
@@ -42,80 +83,81 @@ public:
     // Constructor for Graph
     Graph(int size = 0, double density = 0.0) : size(size), density(density), vertices()
     {
-        // Create a graph
-        double **graph;
-        graph = new double *[size];
+        // Create vertices
         for (int i = 0; i < size; i++)
         {
-            graph[i] = new double[size];
-            this->vertices.push_back(Vertex(i));
+            vertices.push_back(Vertex(i));
         }
-        this->graph = graph;
+
+        // Create a graph
+        graph = vector<vector<Vertex>>(size);
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (getRandomDouble(0.0, 1.0) < density && i != j)
+                {
+                    graph[i].push_back(vertices[j]);
+                }
+            }
+        }
     }
 
     // Destructor
     ~Graph()
     {
-        for (int i = 0; i < size; i++)
-        {
-            delete[] graph[i];
-        }
-        delete[] graph;
+        graph.clear();
+        vertices.clear();
     }
 
-    // Function to populate the graph
-    void populate_graph(double lower_limit = 0.0, double upper_limit = 1.0)
+    // Function to populate the graph based on density and range of weights
+    void populate_graph(double lowerLimit, double upperLimit)
     {
         for (int i = 0; i < size; i++)
         {
-            for (int j = 0; j < size; j++)
+            for (int j = 0; graph[i].size() < size; j++)
             {
-                // Graph should not have self loops
-                if (i == j)
-                {
-                    graph[i][j] = false;
-                    continue;
-                }
-                if (getRandomDouble(0.0, 1.0) < density)
-                {
-                    graph[i][j] = getRandomDouble(lower_limit, upper_limit);
-                }
-                else
-                {
-                    graph[i][j] = false;
-                }
+                // Add Edge to map
+                Edge edge(vertices[i], vertices[j], getRandomDouble(lowerLimit, upperLimit));
+                edgeMap[make_pair(i, j)] = edge;
             }
         }
     }
 
+    // Function to check if two vertices are adjacent
     bool adjacent(int x, int y)
     {
-        return graph[x][y];
+        for (int i = 0; i < graph[x].size(); i++)
+        {
+            if (graph[x][i].get_id() == y)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     // Function to return a vector of neighbors
-    vector<int> neighbors(int x)
+    vector<Vertex> neighbors(int x)
     {
-        vector<int> result;
-        for (int i = 0; i < size; i++)
-        {
-            if (graph[x][i])
-            {
-                result.push_back(i);
-            }
-        }
-        return result;
+        return graph[x];
     }
 
     // Add Edge
     void add_edge(int x, int y, bool weight)
     {
-        graph[x][y] = weight;
+        // Add edge to graph
+        graph[x].push_back(vertices[y]);
+
+        // Add edge to map
+        Edge edge(vertices[x], vertices[y], weight);
+        edgeMap[make_pair(x, y)] = edge;
     }
 
     // Delete Edge
     void delete_edge(int x, int y)
     {
+        // TODO: Update this function
         graph[x][y] = false;
     }
 
@@ -137,27 +179,9 @@ public:
         cout << "Graph:" << endl;
         for (int i = 0; i < size; i++)
         {
-            for (int j = 0; j < size; j++)
+            for (int j = 0; j < graph[i].size(); j++)
             {
-                if (graph[i][j])
-
-                    cout << 1 << " ";
-                else
-                    cout << 0 << " ";
-            }
-            cout << endl;
-        }
-    }
-
-    // Function to print the graph with weights
-    void print_with_weights()
-    {
-        cout << "Graph:" << endl;
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < size; j++)
-            {
-                cout << fixed << setprecision(2) << graph[i][j] << " ";
+                cout << graph[i][j] << " ";
             }
             cout << endl;
         }
@@ -166,12 +190,12 @@ public:
 private:
     int size;
     double density;
-    double **graph;
+    vector<vector<Vertex>> graph;
     vector<Vertex> vertices;
+    map<pair<int, int>, Edge> edgeMap;
 };
 
 class PriorityQueue
-// TODO: Implement the priority queue
 {
 public:
     // Constructor
@@ -194,15 +218,83 @@ public:
         return queue[0];
     }
 
+    // Function to change the priority of a vertex
+    void change_priority(double new_priority, Vertex v)
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            if (queue[i].get_id() == v.get_id())
+            {
+                queue[i].data = new_priority;
+                break;
+            }
+        }
+    }
+
+    // Function to pop the top element of the queue
+    void pop()
+    {
+        queue.erase(queue.begin());
+    }
+
+    // Function to check if an element exists in queue
+    bool contains(Vertex v)
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            if (queue[i].get_id() == v.get_id())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    // Insert new element to que
+    void insert(Vertex v)
+    {
+        queue.push_back(v);
+        sort_queue();
+    }
+
+    // Function to print the queue
+    void print_queue()
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            cout << queue[i].get_id() << " ";
+        }
+        cout << endl;
+    }
+    // Destructor
+    ~PriorityQueue()
+    {
+        queue.clear();
+    }
+
 private:
     vector<Vertex> queue;
+
+    // Function to sort the queue
+    void sort_queue()
+    {
+        sort(queue.begin(), queue.end(), [](Vertex a, Vertex b)
+             { return a.data < b.data; });
+    }
+};
+
+class ShortestPath
+// Class to find the shortest path between two vertices inside a graph using the priority queue
+{
+public:
+    // Constructor based on Graph,
+private:
+    vector<Vertex> vertices;
+    vector<Vertex> sptSet;
 };
 
 int main()
 {
-    Graph g(5, 0.5);
-    g.populate_graph(1, 10);
+    Graph g(50, 0.1);
     g.print_graph();
-    g.print_with_weights();
     return 0;
 }
