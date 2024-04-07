@@ -17,11 +17,10 @@ double getRandomDouble(double lowerLimit, double upperLimit)
     return dis(gen);
 }
 
-
 /**
  * @class Vertex
  * @brief Represents a vertex in a graph.
- * 
+ *
  * The Vertex class stores information about a vertex in a graph. It contains an ID and a data value.
  * The ID uniquely identifies the vertex, and the data value represents additional information associated with the vertex.
  */
@@ -65,7 +64,6 @@ ostream &operator<<(ostream &os, const Vertex &v)
     return os;
 }
 
-
 /**
  * Represents an edge in a graph.
  */
@@ -74,7 +72,7 @@ class Edge
 public:
     /**
      * Constructs an Edge object.
-     * 
+     *
      * @param start The start vertex of the edge.
      * @param end The end vertex of the edge.
      * @param weight The weight of the edge.
@@ -83,7 +81,7 @@ public:
 
     /**
      * Gets the start vertex of the edge.
-     * 
+     *
      * @return The start vertex.
      */
     Vertex get_start()
@@ -93,7 +91,7 @@ public:
 
     /**
      * Gets the end vertex of the edge.
-     * 
+     *
      * @return The end vertex.
      */
     Vertex get_end()
@@ -103,7 +101,7 @@ public:
 
     /**
      * Gets the weight of the edge.
-     * 
+     *
      * @return The weight.
      */
     double get_weight()
@@ -112,15 +110,15 @@ public:
     }
 
 private:
-    Vertex start; // The start vertex of the edge
-    Vertex end; // The end vertex of the edge
+    Vertex start;  // The start vertex of the edge
+    Vertex end;    // The end vertex of the edge
     double weight; // The weight of the edge
 };
 
 /**
  * @class Graph
  * @brief Represents a graph data structure.
- * 
+ *
  * The Graph class provides functionality to create and manipulate a graph.
  * It supports adding and deleting edges, checking adjacency between vertices,
  * getting neighbors of a vertex, setting and getting node values, and printing the graph.
@@ -164,12 +162,15 @@ public:
     {
         for (int i = 0; i < size; i++)
         {
-            for (int j = 0; graph[i].size() < size; j++)
+            for (int j = 0; j < size; j++) // Corrected the condition to iterate over all vertices
             {
-                // Create Edge with weight in range of lowerLimit and upperLimit
-                Edge edge(vertices[i], vertices[j], getRandomDouble(lowerLimit, upperLimit)); 
-                // Add Edge to map
-                edgeMap[make_pair(i, j)] = edge;
+                if (i != j) // Added a condition to avoid self-loops
+                {
+                    // Create Edge with weight in range of lowerLimit and upperLimit
+                    Edge edge(vertices[i], vertices[j], getRandomDouble(lowerLimit, upperLimit));
+                    // Add Edge to map
+                    edgeMap.insert({make_pair(i, j), edge});
+                }
             }
         }
     }
@@ -194,20 +195,21 @@ public:
     }
 
     // Add Edge
-    void add_edge(int x, int y, bool weight)
+    void add_edge(int x, int y, bool weight) // x,y are IDs of vertices
     {
         // Add edge to graph
         graph[x].push_back(vertices[y]);
+        graph[y].push_back(vertices[x]);
 
         // Add edge to map
         Edge edge(vertices[x], vertices[y], weight);
-        edgeMap[make_pair(x, y)] = edge;
+        edgeMap.insert({make_pair(x, y), edge});
     }
 
     // Delete Edge
     void delete_edge(int x, int y)
     {
-        // Remove edge from graph
+        // Remove connection from x
         for (int i = 0; i < graph[x].size(); i++)
         {
             if (graph[x][i].get_id() == y)
@@ -216,6 +218,16 @@ public:
                 break;
             }
         }
+        // Remove connection from y
+        for (int i = 0; i < graph[y].size(); i++)
+        {
+            if (graph[y][i].get_id() == x)
+            {
+                graph[y].erase(graph[y].begin() + i);
+                break;
+            }
+        }
+
         // Remove edge from map
         edgeMap.erase(make_pair(x, y));
     }
@@ -346,7 +358,8 @@ class ShortestPath
 {
 public:
     // Constructor based on Graph, start and end vertices
-    ShortestPath(Graph graph, Vertex start, Vertex end) : graph(graph), start(start), end(end) {
+    ShortestPath(Graph graph, Vertex start, Vertex end) : graph(graph), start(start), end(end)
+    {
         // Run Dijkstra's algorithm using the priority queue
         PriorityQueue queue;
         queue.insert(start);
@@ -370,7 +383,6 @@ public:
                 }
             }
         }
-
     }
 
 private:
