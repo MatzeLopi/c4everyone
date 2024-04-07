@@ -1,4 +1,11 @@
-// Homework of week 3
+/**
+ *  Homework 3 of the C++ for C Developers course Part A
+ *
+ * I went with the list representation of the graph, since it should at least represent 50 vertices and the adjacency matrix get large fast.
+ * Also most real world graphs are sparse, so the adjacency list representation is more efficient. The graph is populated with random weights between 0 and 10. (Can be changed as you like)
+ *
+ * Everything else should be fairly straight forward.
+ **/
 
 #include <iostream>
 #include <random>
@@ -442,6 +449,7 @@ public:
                 }
             }
         }
+        print_path();
     }
 
     void print_path()
@@ -473,6 +481,11 @@ public:
         }
         cout << start << endl;
     }
+    // Get cost of shortest path
+    double get_cost()
+    {
+        return min_cost[end];
+    }
 
 private:
     Graph graph;
@@ -484,17 +497,52 @@ private:
 int main()
 {
     // Generate a graph with 50 vertices and a density of 0.1
-    Graph g(50, 0.1);
-    g.populate_graph(0.0, 10.0);
+    string out_message = "I decided to go with the adjecant list representation for the graph since the graph is sparcly populated and relativly big.\n I also decided to populate the graph with random weights between 0 and 10. \n The graph is then printed and a shortest path is calculated between two vertices. \n I learned much about Graphs and Priority Queue";
+    Graph g20(50, 0.2);
+    Graph g40(50, 0.4);
+    g20.populate_graph(0.0, 10.0);
+    g40.populate_graph(0.0, 10.0);
 
     // Can be used for debugging
-    g.print_graph();
+    // g20.print_graph();
+    // g40.print_graph();
 
-    Vertex v1 = Vertex(1, 0.0);
+    Vertex start = Vertex(0, 0.0);
     Vertex v2 = Vertex(10, 0.0);
+    vector<double> costs20;
+    for (int i = 1; i < 50; i++)
+    {
+        Vertex v = Vertex(i, 0.0);
+        ShortestPath sp = ShortestPath(g20, start, v);
+        costs20.push_back(sp.get_cost());
+    }
 
-    ShortestPath sp = ShortestPath(g, v1, v2);
-    sp.print_path();
+    double sum = 0.0;
+    for (double cost : costs20)
+    {
+        sum += cost;
+    }
+    double average = sum / costs20.size();
 
+    vector<double> costs40;
+    for (int i = 1; i < 50; i++)
+    {
+        Vertex v = Vertex(i, 0.0);
+        ShortestPath sp = ShortestPath(g40, start, v);
+        costs40.push_back(sp.get_cost());
+    }
+
+    double sum40 = 0.0;
+    for (double cost : costs40)
+    {
+        sum40 += cost;
+    }
+    double average40 = sum40 / costs40.size();
+
+    cout << "\n\n\n"
+         << endl;
+    cout << out_message << endl;
+    cout << "Average cost Graph 20%: " << average << endl;
+    cout << "Average cost Graph 40%: " << average40 << endl;
     return 0;
 }
