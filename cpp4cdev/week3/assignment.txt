@@ -64,6 +64,36 @@ ostream &operator<<(ostream &os, const Vertex &v)
     return os;
 }
 
+// Operator overload for comparison of Vertex objects
+bool operator<(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() < v2.get_id();
+}
+
+bool operator==(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() == v2.get_id();
+}
+
+bool operator!=(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() != v2.get_id();
+}
+
+bool operator>(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() > v2.get_id();
+}
+bool operator<=(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() <= v2.get_id();
+}
+
+bool operator>=(const Vertex &v1, const Vertex &v2)
+{
+    return v1.get_id() >= v2.get_id();
+}
+
 /**
  * Represents an edge in a graph.
  */
@@ -287,158 +317,168 @@ private:
     double density;
 };
 
+struct Node
+{
+    Vertex vertex;
+    double priority;
+};
+
+// Prioirity Queue
 class PriorityQueue
 {
 public:
-    // Constructor
     PriorityQueue() : queue() {}
 
-    // Function to check if the queue is empty
-    bool empty()
-    {
-        return queue.empty();
-    }
-    // Function to return the size of the queue
-    int size()
-    {
-        return queue.size();
-    }
-
-    // Function to return the top element of the queue
-    Vertex top()
-    {
-        return queue[0];
-    }
-
-    // Function to change the priority of a vertex
-    void change_priority(double new_priority, Vertex v)
-    {
-        for (int i = 0; i < queue.size(); i++)
-        {
-            if (queue[i].get_id() == v.get_id())
-            {
-                queue[i].data = new_priority;
-                break;
-            }
-        }
-        sort_queue();
-    }
-
-    // Function to pop the top element of the queue
-    void pop()
-    {
-        queue.erase(queue.begin());
-    }
-
-    // Function to check if an element exists in queue
-    bool contains(Vertex v)
-    {
-        for (int i = 0; i < queue.size(); i++)
-        {
-            if (queue[i].get_id() == v.get_id())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-    // Insert new element to que
-    void insert(Vertex v)
-    {
-        queue.push_back(v);
-        sort_queue();
-    }
-
-    // Function to print the queue
-    void print_queue()
-    {
-        for (int i = 0; i < queue.size(); i++)
-        {
-            cout << queue[i].get_id() << " ";
-        }
-        cout << endl;
-    }
     // Destructor
     ~PriorityQueue()
     {
         queue.clear();
     }
 
-private:
-    vector<Vertex> queue;
+    int size()
+    {
+        return queue.size();
+    }
 
-    // Function to sort the queue
+    Vertex top()
+    {
+        return queue.front().vertex;
+    }
+
+    Vertex pop()
+    {
+        Vertex vertex = queue.front().vertex;
+        queue.erase(queue.begin());
+        return vertex;
+    }
+
+    bool contains(Vertex vertex)
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            if (queue[i].vertex.get_id() == vertex.get_id())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void change_priority(Vertex vertex, double priority)
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            if (queue[i].vertex.get_id() == vertex.get_id())
+            {
+                queue[i].priority = priority;
+                break;
+            }
+        }
+        sort_queue();
+    }
+
+    bool empty()
+    {
+        return queue.empty();
+    }
+
+    void insert(Vertex vertex, double priority)
+    {
+        Node node{vertex, priority};
+        queue.push_back(node);
+        sort_queue();
+    }
+
+    void print_queue()
+    {
+        for (int i = 0; i < queue.size(); i++)
+        {
+            cout << queue[i].vertex << " : " << queue[i].priority << endl;
+        }
+    }
+
+private:
+    vector<Node> queue;
+
     void sort_queue()
     {
-        sort(queue.begin(), queue.end(), [](Vertex a, Vertex b)
-             { return a.data < b.data; });
+        sort(queue.begin(), queue.end(), [](Node a, Node b)
+             { return a.priority < b.priority; });
     }
 };
 
+// Shortest Path
+
 class ShortestPath
-// Class to find the shortest path between two vertices inside a graph using the priority queue
 {
 public:
-    // Constructor based on Graph, start and end vertices
+    // Constructor
     ShortestPath(Graph graph, Vertex start, Vertex end) : graph(graph), start(start), end(end)
     {
-        // Run Dijkstra's algorithm using the priority queue
-        PriorityQueue queue;
-        queue.insert(start);
-        for (int i = 0; i < graph.vertices.size(); i++)
-        {
-            if (graph.vertices[i].get_id() != start.get_id())
-            {
-                graph.vertices[i].data = numeric_limits<double>::infinity();
-                queue.insert(graph.vertices[i]);
-            }
-        }
+        PriorityQueue pq = PriorityQueue();
 
-        while (!queue.empty())
+        pq.insert(start, 0.0);
+        min_cost.insert({start, 0.0});
+
+        while (!pq.empty())
         {
-            Vertex u = queue.top();
-            queue.pop();
-            vector<Vertex> neighbors = graph.neighbors(u.get_id());
+            Vertex current_vertex = pq.pop();
+            if (current_vertex.get_id() == end.get_id())
+            {
+                cout << "Shortest path found!" << endl;
+                break;
+            }
+            vector<Vertex> neighbors = graph.neighbors(current_vertex.get_id());
             for (int i = 0; i < neighbors.size(); i++)
             {
-                Vertex v = neighbors[i];
-
-                cout << "Edge between " << u.get_id() << " and " << v.get_id() << endl;
-                double alt = u.data + graph.get_edge_value(u, v);
-                if (alt < v.data)
+                Vertex neighbor = neighbors[i];
+                double edge_weight = graph.get_edge_value(current_vertex, neighbor);
+                double cost = min_cost[current_vertex] + edge_weight;
+                // Check if the neighbor has not been visited or the cost is less than the previous cost
+                if (!min_cost.count(neighbor) || cost < min_cost[neighbor])
                 {
-                    v.data = alt;
-                    queue.change_priority(alt, v);
-                }
-            }
-            queue.print_queue();
-        }
-
-        // Print the shortest path
-        cout << "Shortest path from " << start.get_id() << " to " << end.get_id() << " is: " << endl;
-        Vertex current = end;
-        path.push_back(current);
-        while (current.get_id() != start.get_id())
-        {
-            vector<Vertex> neighbors = graph.neighbors(current.get_id());
-            for (int i = 0; i < neighbors.size(); i++)
-            {
-                Vertex v = neighbors[i];
-                if (v.data + graph.get_edge_value(v, current) == current.data)
-                {
-                    path.push_back(v);
-                    current = v;
-                    break;
+                    min_cost[neighbor] = cost;
+                    pq.insert(neighbor, cost);
                 }
             }
         }
     }
 
+    void print_path()
+    {
+        cout << "Shortest path from " << start << " to " << end << " is: " << min_cost[end] << endl;
+
+        // Walk the path backwards
+        vector<Vertex> path;
+        Vertex current_vertex = end;
+        while (current_vertex != start)
+        {
+            cout << current_vertex << " <- ";
+            vector<Vertex> neighbors = graph.neighbors(current_vertex.get_id());
+            PriorityQueue pq = PriorityQueue();
+            for (int i = 0; i < neighbors.size(); i++)
+            {
+                Vertex neighbor = neighbors[i];
+                pq.insert(neighbor, min_cost[neighbor]);
+            }
+            current_vertex = pq.pop();
+            // Check if current Vertex is already in the path
+            if (find(path.begin(), path.end(), current_vertex) != path.end())
+            {
+                cout << "\n Cycle detected! " << current_vertex << " is already in the path. Exiting..." << endl;
+                break;
+            }
+            else
+                path.push_back(current_vertex);
+        }
+        cout << start << endl;
+    }
+
 private:
+    Graph graph;
     Vertex start;
     Vertex end;
-    Graph graph;
-    vector<Vertex> path;
+    map<Vertex, double> min_cost;
 };
 
 int main()
@@ -446,9 +486,15 @@ int main()
     // Generate a graph with 50 vertices and a density of 0.1
     Graph g(50, 0.1);
     g.populate_graph(0.0, 10.0);
-    // g.print_graph();
 
-    ShortestPath sp(g, Vertex(0), Vertex(11));
+    // Can be used for debugging
+    g.print_graph();
+
+    Vertex v1 = Vertex(1, 0.0);
+    Vertex v2 = Vertex(10, 0.0);
+
+    ShortestPath sp = ShortestPath(g, v1, v2);
+    sp.print_path();
 
     return 0;
 }
