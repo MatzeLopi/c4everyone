@@ -1,5 +1,15 @@
 {
-  "files.associations": {
-    "ostream": "cpp"
-  }
+    "editor.formatOnSave": true,
+    "[javascript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[python]": {
+        "editor.formatOnSave": true
+    },
+    "code-runner.clearPreviousOutput": true,
+    "code-runner.runInTerminal": true,
+    "code-runner.saveFileBeforeRun": true,
+    "files.associations": {
+        "tuple": "cpp"
+    }
 }
