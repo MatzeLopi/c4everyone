@@ -1,5 +1,4 @@
 // Homework of week 3
-// Populate graph based on dessity
 
 #include <iostream>
 #include <random>
@@ -17,25 +16,46 @@ double getRandomDouble(double lowerLimit, double upperLimit)
     uniform_real_distribution<double> dis(lowerLimit, upperLimit);
     return dis(gen);
 }
-// Vertex class
+
+
+/**
+ * @class Vertex
+ * @brief Represents a vertex in a graph.
+ * 
+ * The Vertex class stores information about a vertex in a graph. It contains an ID and a data value.
+ * The ID uniquely identifies the vertex, and the data value represents additional information associated with the vertex.
+ */
 class Vertex
 {
 public:
-    // Default constructor
+    /**
+     * @brief Default constructor.
+     * @param id The ID of the vertex.
+     * @param data The data value associated with the vertex (default: 0.0).
+     */
     Vertex(int id, double data = 0.0) : id(id), data(data) {}
 
-    // Friend function to overload the << operator
+    /**
+     * @brief Overloads the << operator to allow printing of Vertex objects.
+     * @param os The output stream.
+     * @param v The Vertex object to be printed.
+     * @return The output stream.
+     */
     friend ostream &operator<<(ostream &os, const Vertex &v);
 
-    // Getter for id
+    /**
+     * @brief Getter for the ID of the vertex.
+     * @return The ID of the vertex.
+     */
     int get_id() const
     {
         return id;
     }
-    double data;
+
+    double data; // Additional data associated with the vertex.
 
 private:
-    int id;
+    int id; // The ID of the vertex.
 };
 
 // Print operator overload for Vertex
@@ -44,41 +64,69 @@ ostream &operator<<(ostream &os, const Vertex &v)
     os << "Vertex: " << v.get_id() << " Data: " << v.data;
     return os;
 }
-// Edge class
+
+
+/**
+ * Represents an edge in a graph.
+ */
 class Edge
 {
 public:
-    // Constructor
+    /**
+     * Constructs an Edge object.
+     * 
+     * @param start The start vertex of the edge.
+     * @param end The end vertex of the edge.
+     * @param weight The weight of the edge.
+     */
     Edge(Vertex start, Vertex end, double weight) : start(start), end(end), weight(weight) {}
 
-    // Getter for start vertex
+    /**
+     * Gets the start vertex of the edge.
+     * 
+     * @return The start vertex.
+     */
     Vertex get_start()
     {
         return start;
     }
 
-    // Getter for end vertex
+    /**
+     * Gets the end vertex of the edge.
+     * 
+     * @return The end vertex.
+     */
     Vertex get_end()
     {
         return end;
     }
 
-    // Getter for weight
+    /**
+     * Gets the weight of the edge.
+     * 
+     * @return The weight.
+     */
     double get_weight()
     {
         return weight;
     }
 
 private:
-    Vertex start;
-    Vertex end;
-    double weight;
+    Vertex start; // The start vertex of the edge
+    Vertex end; // The end vertex of the edge
+    double weight; // The weight of the edge
 };
 
-// Graph class
+/**
+ * @class Graph
+ * @brief Represents a graph data structure.
+ * 
+ * The Graph class provides functionality to create and manipulate a graph.
+ * It supports adding and deleting edges, checking adjacency between vertices,
+ * getting neighbors of a vertex, setting and getting node values, and printing the graph.
+ */
 class Graph
 {
-
 public:
     // Constructor for Graph
     Graph(int size = 0, double density = 0.0) : size(size), density(density), vertices()
@@ -108,6 +156,7 @@ public:
     {
         graph.clear();
         vertices.clear();
+        edgeMap.clear();
     }
 
     // Function to populate the graph based on density and range of weights
@@ -117,8 +166,9 @@ public:
         {
             for (int j = 0; graph[i].size() < size; j++)
             {
+                // Create Edge with weight in range of lowerLimit and upperLimit
+                Edge edge(vertices[i], vertices[j], getRandomDouble(lowerLimit, upperLimit)); 
                 // Add Edge to map
-                Edge edge(vertices[i], vertices[j], getRandomDouble(lowerLimit, upperLimit));
                 edgeMap[make_pair(i, j)] = edge;
             }
         }
@@ -157,8 +207,17 @@ public:
     // Delete Edge
     void delete_edge(int x, int y)
     {
-        // TODO: Update this function
-        graph[x][y] = false;
+        // Remove edge from graph
+        for (int i = 0; i < graph[x].size(); i++)
+        {
+            if (graph[x][i].get_id() == y)
+            {
+                graph[x].erase(graph[x].begin() + i);
+                break;
+            }
+        }
+        // Remove edge from map
+        edgeMap.erase(make_pair(x, y));
     }
 
     // Get Node Value
@@ -286,15 +345,44 @@ class ShortestPath
 // Class to find the shortest path between two vertices inside a graph using the priority queue
 {
 public:
-    // Constructor based on Graph,
+    // Constructor based on Graph, start and end vertices
+    ShortestPath(Graph graph, Vertex start, Vertex end) : graph(graph), start(start), end(end) {
+        // Run Dijkstra's algorithm using the priority queue
+        PriorityQueue queue;
+        queue.insert(start);
+        while (!queue.empty())
+        {
+            Vertex current = queue.top();
+            queue.pop();
+            if (current.get_id() == end.get_id())
+            {
+                break;
+            }
+            vector<Vertex> neighbors = graph.neighbors(current.get_id());
+            for (int i = 0; i < neighbors.size(); i++)
+            {
+                Vertex neighbor = neighbors[i];
+                double new_distance = graph.get_node_value(current.get_id()) + graph.get_node_value(neighbor.get_id());
+                if (new_distance < graph.get_node_value(neighbor.get_id()))
+                {
+                    graph.set_node_value(neighbor.get_id(), new_distance);
+                    queue.insert(neighbor);
+                }
+            }
+        }
+
+    }
+
 private:
-    vector<Vertex> vertices;
-    vector<Vertex> sptSet;
+    Vertex start;
+    Vertex end;
+    Graph graph;
 };
 
 int main()
 {
     Graph g(50, 0.1);
     g.print_graph();
+
     return 0;
 }
