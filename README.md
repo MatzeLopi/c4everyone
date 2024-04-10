@@ -164,11 +164,18 @@ In Week 2, we explored the following topics:
 ### Week 3
 
 In Week 3 we explored the following topics:
-- Deepdive into classes in C++
+- Deep-dive into classes in C++
 - Exploring graph theory and dijkstra algorithm
 - Introduction to priority queues
 - Homework which combined all the concepts above
 
 ### Week 4
+In Week 4 we explored the following topics:
+- Minimal Spanning Tree Algorithms
+- Overloading Functions and understanding how the compiler decides which code to run
+- Intro to STL
+- STL Containers
+- STL Iterators
+- STL Algorithms
 
 ### Week 5
