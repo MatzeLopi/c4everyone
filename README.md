@@ -179,3 +179,4 @@ In Week 4 we explored the following topics:
 - STL Algorithms
 
 ### Week 5
+- Exam

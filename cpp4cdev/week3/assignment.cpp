@@ -330,7 +330,7 @@ struct Node
     double priority;
 };
 
-// Prioirity Queue
+// Priority Queue
 class PriorityQueue
 {
 public:
@@ -497,7 +497,7 @@ private:
 int main()
 {
     // Generate a graph with 50 vertices and a density of 0.1
-    string out_message = "I decided to go with the adjecant list representation for the graph since the graph is sparcly populated and relativly big.\n I also decided to populate the graph with random weights between 0 and 10. \n The graph is then printed and a shortest path is calculated between two vertices. \n I learned much about Graphs and Priority Queue";
+    string out_message = "I decided to go with the adjacent list representation for the graph since the graph is sparc populated and relatively big.\n I also decided to populate the graph with random weights between 0 and 10. \n The graph is then printed and a shortest path is calculated between two vertices. \n I learned much about Graphs and Priority Queue";
     Graph g20(50, 0.2);
     Graph g40(50, 0.4);
     g20.populate_graph(0.0, 10.0);
