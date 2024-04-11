@@ -180,3 +180,10 @@ In Week 4 we explored the following topics:
 
 ### Week 5
 - Exam
+
+### Week 6 Start of Course B
+- Deeper dive into the STL
+- Deep dive into container types
+- Deep dive into iterator types and their differences
+- Deep dive into algorithms
+- Introduction to Lambda expressions/functions
