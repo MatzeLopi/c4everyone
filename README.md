@@ -170,6 +170,7 @@ In Week 3 we explored the following topics:
 - Homework which combined all the concepts above
 
 ### Week 4
+
 In Week 4 we explored the following topics:
 - Minimal Spanning Tree Algorithms
 - Overloading Functions and understanding how the compiler decides which code to run
@@ -179,9 +180,12 @@ In Week 4 we explored the following topics:
 - STL Algorithms
 
 ### Week 5
+Only the exam was done in this week
 - Exam
 
 ### Week 6 Start of Course B
+
+Week 6 started course B of the last leg of the Course. This week covered: 
 - Deeper dive into the STL
 - Deep dive into container types
 - Deep dive into iterator types and their differences
