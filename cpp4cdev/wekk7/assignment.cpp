@@ -92,9 +92,9 @@ public:
                 // Upper right corner
                 else if (i == 0 && j == size - 1)
                 {
-                    edges[size].push_back(size - 2);
-                    edges[size].push_back(2 * size - 1);
-                    edges[size].push_back(2 * size - 2);
+                    edges[size - 1].push_back(size - 2);
+                    edges[size - 1].push_back(2 * size - 1);
+                    edges[size - 1].push_back(2 * size - 2);
                 }
                 // Lower left corner
                 else if (i == size - 1 && j == 0)
@@ -106,8 +106,8 @@ public:
                 // Lower right corner
                 else if (i == size - 1 && j == size - 1)
                 {
-                    edges[size * size].push_back(size * size - size);
-                    edges[size * size].push_back(size * size - 1);
+                    edges[size * size - 1].push_back(size * size - size);
+                    edges[size * size - 1].push_back(size * size - 1);
                 }
                 // Check if the node is on the border North or South
                 else if (i == 0 || i == size - 1)
