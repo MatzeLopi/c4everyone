@@ -57,6 +57,13 @@ struct Tile
     belongsTo player;
 };
 
+// Output stream operator for Tile struct
+ostream &operator<<(ostream &os, const Tile &tile)
+{
+    os << "(" << tile.x << ", " << tile.y << ")";
+    return os;
+}
+
 class Hex
 {
 public:
@@ -76,6 +83,7 @@ public:
      */
     Hex(int size) : size(size)
     {
+
         // Create the board as a graph with n^2 nodes
         board = vector<vector<Tile>>(size, vector<Tile>(size));
         for (int i = 0; i < size; i++)
@@ -87,7 +95,23 @@ public:
         }
 
         // Create the edges
-        edges = vector<vector<int>>(size * size, vector<int>());
+        edges = vector<vector<Tile>>(size * size + 4, vector<Tile>());
+
+        north.x = size;
+        north.y = size;
+        north.player = belongsTo::RED;
+
+        south.x = size + 1;
+        south.y = size;
+        south.player = belongsTo::RED;
+
+        west.x = size;
+        west.y = size + 1;
+        west.player = belongsTo::BLUE;
+
+        east.x = size + 1;
+        east.y = size + 1;
+        east.player = belongsTo::BLUE;
 
         for (int i = 0; i < size; i++)
         {
@@ -96,79 +120,112 @@ public:
                 // Upper left corner
                 if (i == 0 && j == 0)
                 {
-                    edges[0].push_back(1);
-                    edges[0].push_back(size);
+                    edges[0].push_back(board[0][1]);
+                    edges[0].push_back(board[1][0]);
+                    edges[0].push_back(north);
+                    edges[0].push_back(west);
                 }
                 // Upper right corner
                 else if (i == 0 && j == size - 1)
                 {
-                    edges[size - 1].push_back(size - 2);
-                    edges[size - 1].push_back(2 * size - 1);
-                    edges[size - 1].push_back(2 * size - 2);
+                    edges[size - 1].push_back(board[0][size - 2]);
+                    edges[size - 1].push_back(board[1][size - 1]);
+                    edges[size - 1].push_back(board[1][size - 2]);
+                    edges[size - 1].push_back(north);
+                    edges[size - 1].push_back(east);
                 }
                 // Lower left corner
                 else if (i == size - 1 && j == 0)
                 {
-                    edges[i * size].push_back((i - 1) * size);
-                    edges[i * size].push_back((i - 1) * size - 2);
-                    edges[i * size].push_back(i * size + 1);
+                    edges[i * size].push_back(board[size - 1][1]);
+                    edges[i * size].push_back(board[size - 2][0]);
+                    edges[i * size].push_back(board[size - 2][1]);
+                    edges[i * size].push_back(south);
+                    edges[i * size].push_back(west);
                 }
                 // Lower right corner
                 else if (i == size - 1 && j == size - 1)
                 {
-                    edges[size * size - 1].push_back(size * size - size);
-                    edges[size * size - 1].push_back(size * size - 1);
+                    edges[size * size - 1].push_back(board[size - 1][size - 2]);
+                    edges[size * size - 1].push_back(board[size - 2][size - 1]);
+                    edges[size * size - 1].push_back(south);
+                    edges[size * size - 1].push_back(east);
                 }
                 // Check if the node is on the border North or South
                 else if (i == 0 || i == size - 1)
                 {
 
                     // Right and Left neighbors
-                    edges[i * size + j].push_back(i * size + j - 1);
-                    edges[i * size + j].push_back(i * size + j + 1);
+                    edges[i * size + j].push_back(board[i][j - 1]);
+                    edges[i * size + j].push_back(board[i][j + 1]);
 
                     // Lower neighbors
                     if (i == 0)
                     {
-                        edges[i * size + j].push_back((i + 1) * size + j);
-                        edges[i * size + j].push_back((i + 1) * size + j + 1);
+                        edges[i * size + j].push_back(board[(i + 1)][j]);
+                        edges[i * size + j].push_back(board[(i + 1)][j + 1]);
+                        edges[i * size + j].push_back(north);
                     }
                     // Upper neighbors
                     else if (i == size - 1)
                     {
-                        edges[i * size + j].push_back((i - 1) * size + j);
-                        edges[i * size + j].push_back((i - 1) * size + j + 1);
+                        edges[i * size + j].push_back(board[(i - 1)][j]);
+                        edges[i * size + j].push_back(board[(i - 1)][j + 1]);
+                        edges[i * size + j].push_back(south);
                     }
                 }
                 // Check if the node is on the border East or West
                 else if (j == 0 || j == size - 1)
                 {
 
-                    edges[i * size + j].push_back((i - 1) * size + j);
-                    edges[i * size + j].push_back((i + 1) * size + j);
+                    edges[i * size + j].push_back(board[i - 1][j]);
+                    edges[i * size + j].push_back(board[i + 1][j]);
 
                     if (j == 0)
                     {
-                        edges[i * size + j].push_back((i - 1) * size + j + 1);
-                        edges[i * size + j].push_back(i * size + j + 1);
+                        edges[i * size + j].push_back(board[i][j + 1]);
+                        edges[i * size + j].push_back(board[i - 1][j + 1]);
+                        edges[i * size + j].push_back(west);
                     }
                     else if (j == size - 1)
                     {
-                        edges[i * size + j].push_back((i + 1) * size + j - 1);
-                        edges[i * size + j].push_back(i * size + j - 1);
+                        edges[i * size + j].push_back(board[i][j - 1]);
+                        edges[i * size + j].push_back(board[i + 1][j - 1]);
+                        edges[i * size + j].push_back(east);
                     }
                 }
                 // Needs to be middle Node
                 else
                 {
-                    edges[i * size + j].push_back((i - 1) * size + j);     // North
-                    edges[i * size + j].push_back((i + 1) * size + j);     // South
-                    edges[i * size + j].push_back(i * size + j - 1);       // West
-                    edges[i * size + j].push_back(i * size + j + 1);       // East
-                    edges[i * size + j].push_back((i - 1) * size + j - 1); // Northwest
-                    edges[i * size + j].push_back((i + 1) * size + j + 1); // Southeast
+                    edges[i * size + j].push_back(board[i - 1][j]);
+                    edges[i * size + j].push_back(board[i - 1][j + 1]);
+                    edges[i * size + j].push_back(board[i][j - 1]);
+                    edges[i * size + j].push_back(board[i][j + 1]);
+                    edges[i * size + j].push_back(board[i + 1][j - 1]);
+                    edges[i * size + j].push_back(board[i + 1][j]);
                 }
             }
+        }
+
+        // Add one node for N
+        for (int i = 0; i < size; i++)
+        {
+            edges[size * size].push_back(north);
+        }
+        // Add node for S
+        for (int i = 0; i < size; i++)
+        {
+            edges[size * size + 1].push_back(south);
+        }
+        // Add node for W
+        for (int i = 0; i < size; i++)
+        {
+            edges[size * size + 2].push_back(west);
+        }
+        // Add node for E
+        for (int i = 0; i < size; i++)
+        {
+            edges[size * size + 3].push_back(east);
         }
     }
 
@@ -264,7 +321,7 @@ public:
     // Function to print the edges
     void print_edges()
     {
-        for (int i = 0; i < size * size; i++)
+        for (int i = 0; i < size * size + 4; i++)
         {
             cout << i << ": ";
             for (int j = 0; j < edges[i].size(); j++)
@@ -331,45 +388,24 @@ private:
         board[x][y].player = player;
         round++;
     }
-    // Function to check if a path exists between two nodes using DFS
-    bool check_path_exists(int start, int end)
+
+    vector<Tile> get_neighbors(int x, int y, belongsTo player)
     {
-        // Create a visited array to keep track of visited nodes
-        vector<bool> visited(size * size, false);
-
-        // Call the DFS function to check for a path
-        return dfs(start, end, visited);
-    }
-
-    // DFS function to traverse the graph and check for a path
-    bool dfs(int current, int end, vector<bool> &visited)
-    {
-        // Mark the current node as visited
-        visited[current] = true;
-
-        // If the current node is the end node, return true
-        if (current == end)
-            return true;
-
-        // Traverse all the neighbors of the current node
-        for (int neighbor : edges[current])
+        vector<Tile> neighbors;
+        for (int i = 0; i < edges[x * size + y].size(); i++)
         {
-            // If the neighbor is not visited, recursively call DFS on it
-            if (!visited[neighbor])
+            if (edges[x * size + y][i].player == player)
             {
-                if (dfs(neighbor, end, visited))
-                    return true;
+                neighbors.push_back(edges[x * size + y][i]);
             }
         }
-
-        // If no path is found, return false
-        return false;
+        return neighbors;
     }
 
     // Function to check if a player has won
     bool check_winner()
     {
-        // TODO Implement the check winner
+
         return false;
     }
 
@@ -444,8 +480,12 @@ private:
 
     int size;                   // Size of the board
     int round = 0;              // Round number
+    Tile north;                 // North edge
+    Tile south;                 // South edge
+    Tile west;                  // West edge
+    Tile east;                  // East edge
     vector<vector<Tile>> board; // The board
-    vector<vector<int>> edges;  // The edges
+    vector<vector<Tile>> edges; // The edges
     belongsTo human_player;     // Player 1
     belongsTo ai_player;        // Player 2
     belongsTo currentPlayer;    // Current player
@@ -457,6 +497,7 @@ int main()
 {
     srand(time(0));
     Hex hex(5);
+    hex.print_edges();
     hex.start_game();
     hex.print_edges();
     hex.print_board();
