@@ -60,8 +60,14 @@ struct Tile
 // Output stream operator for Tile struct
 ostream &operator<<(ostream &os, const Tile &tile)
 {
-    os << "(" << tile.x << ", " << tile.y << ")";
+    os << "(" << tile.x << ", " << tile.y << ", " << tile.player << ")";
     return os;
+}
+
+// Operator overload for ==
+bool operator==(const Tile &lhs, const Tile &rhs)
+{
+    return lhs.x == rhs.x && lhs.y == rhs.y && lhs.player == rhs.player;
 }
 
 class Hex
@@ -94,9 +100,7 @@ public:
             }
         }
 
-        // Create the edges
-        edges = vector<vector<Tile>>(size * size + 4, vector<Tile>());
-
+        // Initialize the border Nodes of the board
         north.x = size;
         north.y = size;
         north.player = belongsTo::RED;
@@ -113,6 +117,8 @@ public:
         east.y = size + 1;
         east.player = belongsTo::BLUE;
 
+        // Create the edges
+        edges = vector<vector<Tile>>(size * size + 4, vector<Tile>());
         for (int i = 0; i < size; i++)
         {
             for (int j = 0; j < size; j++)
@@ -210,22 +216,22 @@ public:
         // Add one node for N
         for (int i = 0; i < size; i++)
         {
-            edges[size * size].push_back(north);
+            edges[size * size].push_back(board[0][i]);
         }
         // Add node for S
         for (int i = 0; i < size; i++)
         {
-            edges[size * size + 1].push_back(south);
+            edges[size * size + 1].push_back(board[size - 1][i]);
         }
         // Add node for W
         for (int i = 0; i < size; i++)
         {
-            edges[size * size + 2].push_back(west);
+            edges[size * size + 2].push_back(board[i][0]);
         }
         // Add node for E
         for (int i = 0; i < size; i++)
         {
-            edges[size * size + 3].push_back(east);
+            edges[size * size + 3].push_back(board[i][size - 1]);
         }
     }
 
@@ -333,6 +339,24 @@ public:
     }
 
 private:
+    vector<Tile> get_neighbors(Tile tile)
+    {
+        int index = tile.x * size + tile.y % size;
+        vector<Tile> potential_neighbors(6);
+        vector<Tile> neighbors(6);
+
+        potential_neighbors = edges[index];
+
+        for (auto n : potential_neighbors)
+        {
+            if (n.player == tile.player)
+                neighbors.push_back(n);
+            else
+                continue;
+        }
+        return neighbors;
+    }
+
     // Game loop for the Hex game
     void game_loop()
     {
@@ -365,8 +389,18 @@ private:
                     cin >> x >> y;
                 }
             }
-
+            // Print the board after each move
             print_board();
+
+            // Print the neighbors of the current node
+            Tile current = board[x][y];
+            vector<Tile> neighbors = get_neighbors(current);
+            cout << "Neighbors of " << current << ": ";
+            for (auto n : neighbors)
+            {
+                cout << n << " ";
+            }
+            cout << endl;
         }
     }
 
@@ -386,25 +420,57 @@ private:
     void set_node(int x, int y, belongsTo player)
     {
         board[x][y].player = player;
+
+        // Need to update the Tiles in the edges representation
+        for (int i = 0; i < size * size; i++)
+        {
+            for (int j = 0; j < edges[i].size(); j++)
+            {
+                if (edges[i][j].x == x && edges[i][j].y == y)
+                {
+                    edges[i][j].player = player;
+                }
+            }
+        }
+        print_edges();
         round++;
     }
 
-    vector<Tile> get_neighbors(int x, int y, belongsTo player)
+    // DFS to check if a player has won
+    bool dfs(Tile current, Tile end)
     {
-        vector<Tile> neighbors;
-        for (int i = 0; i < edges[x * size + y].size(); i++)
+        assert(current.player != belongsTo::EMPTY);
+        assert(current.player == end.player);
+        vector<Tile> neighbors(6);
+
+        if (current == end)
+            return true;
+
+        neighbors = get_neighbors(current);
+        for (Tile n : neighbors)
         {
-            if (edges[x * size + y][i].player == player)
-            {
-                neighbors.push_back(edges[x * size + y][i]);
-            }
+            if (dfs(n, end))
+                return true;
         }
-        return neighbors;
+
+        return false;
     }
 
     // Function to check if a player has won
     bool check_winner()
     {
+        if (currentPlayer == belongsTo::RED)
+        {
+            if (dfs(north, south))
+            {
+                cout << "Red wins!" << endl;
+                return true;
+            }
+        }
+        else
+        {
+            return false;
+        }
 
         return false;
     }
@@ -499,7 +565,5 @@ int main()
     Hex hex(5);
     hex.print_edges();
     hex.start_game();
-    hex.print_edges();
-    hex.print_board();
     return 0;
 }
