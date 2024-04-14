@@ -10,6 +10,7 @@
 #include <random>
 
 using namespace std;
+const int simulations = 200;
 
 // Function to generate a random integer in the range [min, max]
 int generate_random_int(int min, int max)
@@ -341,7 +342,11 @@ public:
 private:
     vector<Tile> get_neighbors(Tile tile, vector<Tile> neighbors)
     {
-        int index = tile.x * size + tile.y % size;
+        int index;
+        if (tile.x > size || tile.y > size)
+            index = size * size + tile.x % size + (tile.y % size) * 2;
+        else
+            index = tile.x * size + tile.y % size;
         vector<Tile> potential_neighbors(6);
         potential_neighbors = edges[index];
 
@@ -388,22 +393,22 @@ private:
                     cin >> x >> y;
                 }
             }
-            // Print the board after each move
             print_board();
-
-            // Print the neighbors of the current node
-            Tile current = board[x][y];
-            vector<Tile> neighbors;
-            neighbors = get_neighbors(current, neighbors);
-            cout << "Neighbors of " << current << ": ";
-            for (auto n : neighbors)
-            {
-                cout << n << " ";
-            }
-            cout << endl;
         }
+        print_board();
     }
 
+    /**
+     * @brief Makes a move on the board.
+     *
+     * This function makes a move on the board at the specified position (x, y) for the specified player.
+     *
+     * @param x The x-coordinate of the move.
+     * @param y The y-coordinate of the move.
+     * @param player The player making the move.
+     *
+     * @return True if the move is valid, false otherwise.
+     */
     bool move(int x, int y, belongsTo player)
     {
         if (x < 0 || x >= size || y < 0 || y >= size || board[x][y].player != belongsTo::EMPTY)
@@ -412,6 +417,7 @@ private:
         {
             set_node(x, y, player);
             update_player();
+            // print_board();
             return true;
         }
     }
@@ -432,11 +438,22 @@ private:
                 }
             }
         }
-        print_edges();
         round++;
+
+        last_move = board[x][y];
     }
 
-    // DFS to check if a player has won
+    /**
+     * @brief Depth-first search to check if a player has won.
+     *
+     * This function performs a depth-first search to check if a player has won the game.
+     *
+     * @param current The current Tile being visited.
+     * @param end The end Tile to reach.
+     * @param visited The list of visited Tiles.
+     *
+     * @return True if the player has won, false otherwise.
+     */
     bool dfs(Tile current, Tile end, vector<pair<int, int>> visited)
     {
         assert(current.player != belongsTo::EMPTY);
@@ -464,26 +481,121 @@ private:
         return false;
     }
 
-    // Function to check if a player has won
+    /**
+     * @brief Checks if a player has won the game.
+     *
+     * This function checks if a player has won the game by performing a depth-first search from the North edge to the South edge for the Red player,
+     * and from the West edge to the East edge for the Blue player.
+     *
+     * @return True if a player has won, false otherwise.
+     */
     bool check_winner()
     {
-        if (currentPlayer == belongsTo::RED)
-        {
-            vector<pair<int, int>> visited;
-            visited = vector<pair<int, int>>(size * size + 4, {-1, -1});
 
-            if (dfs(north, south, visited))
-            {
-                cout << "Red wins!" << endl;
-                return true;
-            }
-        }
-        else
+        vector<pair<int, int>> visited_red;
+        visited_red = vector<pair<int, int>>(size * size + 4, {-1, -1});
+
+        if (dfs(north, south, visited_red))
         {
-            return false;
+            cout << "Red wins!" << endl;
+            currentPlayer = belongsTo::RED;
+            return true;
+        }
+
+        vector<pair<int, int>> visited_blue;
+        visited_blue = vector<pair<int, int>>(size * size + 4, {-1, -1});
+
+        if (dfs(west, east, visited_blue))
+        {
+            cout << "Blue wins!" << endl;
+            currentPlayer = belongsTo::BLUE;
+            return true;
         }
 
         return false;
+    }
+
+    // TODO Implement lookahead based on a minimax algorithm
+
+    /**
+     * @brief Monte Carlo simulation to find the best move.
+     *
+     * This function performs a Monte Carlo simulation to find the best move for the AI player.
+     * It simulates the game for a specified number of times and calculates the score based on the result of the game.
+     * The move with the highest score is chosen as the best move.
+     *
+     * @return The best move for the AI player.
+     */
+    pair<int, int> monte_carlo_simulation()
+    {
+        // Perform Monte Carlo simulation to find the best move
+        vector<pair<int, int>> legalMoves = get_legal_moves(); // Get all legal moves
+
+        // Initialize variables to keep track of the best move
+        int bestScore = INT_MIN;
+        pair<int, int> bestMove;
+
+        // Perform simulations for each legal move
+        for (auto move : legalMoves)
+        {
+            int totalScore = 0;
+
+            // Simulate the game for each move
+            for (int i = 0; i < simulations; i++)
+            {
+                Hex tempHex(*this);                                   // Create a copy of the current Hex object
+                tempHex.move(move.first, move.second, currentPlayer); // Make move on the copy
+
+                // Perform random moves until the game ends
+                while (!tempHex.check_winner())
+                {
+                    vector<pair<int, int>> tempLegalMoves = tempHex.get_legal_moves();
+                    if (tempLegalMoves.size() == 0)
+                    {
+                        break;
+                    }
+                    int randomIndex = generate_random_int(0, tempLegalMoves.size() - 1);
+                    pair<int, int> randomMove = tempLegalMoves[randomIndex];
+
+                    tempHex.move(randomMove.first, randomMove.second, tempHex.currentPlayer);
+                }
+
+                // Calculate the score based on the result of the game
+                if (tempHex.currentPlayer == ai_player)
+                    totalScore++;
+                else if (tempHex.currentPlayer == human_player)
+                    totalScore--;
+            }
+
+            // Update the best move if the current move has a higher score
+            if (totalScore > bestScore)
+            {
+                bestScore = totalScore;
+                bestMove = move;
+            }
+        }
+
+        // Make the best move
+        return {bestMove.first, bestMove.second};
+    }
+
+    // Function to get all legal moves
+    vector<pair<int, int>> get_legal_moves()
+    {
+        vector<pair<int, int>> legalMoves;
+
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (board[i][j].player == belongsTo::EMPTY)
+                {
+                    legalMoves.push_back({i, j});
+                }
+            }
+        }
+
+        return legalMoves;
     }
 
     // Function to make an AI move
@@ -492,19 +604,17 @@ private:
         // Function to make an AI move
         if (round == 1)
         {
-            // Randomly choose Y or N
-            char choice = generate_random_int(0, 1) == 0 ? 'Y' : 'N';
-            pi_rule(choice, true);
+            // Use monte carlo simulation to check if opponent move was good
+            pair<int, int> best_move = monte_carlo_simulation();
+            if (best_move.first == last_move.x && best_move.second == last_move.y)
+                pi_rule('Y', true);
+            else
+                pi_rule('N', true);
         }
-
-        // Make a random move (for now
-        int x = generate_random_int(0, size - 1);
-        int y = generate_random_int(0, size - 1);
-
-        while (move(x, y, currentPlayer) == false)
+        else
         {
-            x = generate_random_int(0, size - 1);
-            y = generate_random_int(0, size - 1);
+            pair<int, int> best_move = monte_carlo_simulation();
+            move(best_move.first, best_move.second, currentPlayer);
         }
     }
 
@@ -561,6 +671,7 @@ private:
     Tile south;                 // South edge
     Tile west;                  // West edge
     Tile east;                  // East edge
+    Tile last_move;             // Last move
     vector<vector<Tile>> board; // The board
     vector<vector<Tile>> edges; // The edges
     belongsTo human_player;     // Player 1
@@ -574,7 +685,6 @@ int main()
 {
     srand(time(0));
     Hex hex(5);
-    hex.print_edges();
     hex.start_game();
     return 0;
 }
