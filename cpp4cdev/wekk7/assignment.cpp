@@ -339,12 +339,10 @@ public:
     }
 
 private:
-    vector<Tile> get_neighbors(Tile tile)
+    vector<Tile> get_neighbors(Tile tile, vector<Tile> neighbors)
     {
         int index = tile.x * size + tile.y % size;
         vector<Tile> potential_neighbors(6);
-        vector<Tile> neighbors(6);
-
         potential_neighbors = edges[index];
 
         for (auto n : potential_neighbors)
@@ -363,7 +361,8 @@ private:
         while (!check_winner())
         {
 
-            int x, y;
+            int x = 0;
+            int y = 0;
             if (currentPlayer == ai_player)
             {
                 ai_move();
@@ -394,7 +393,8 @@ private:
 
             // Print the neighbors of the current node
             Tile current = board[x][y];
-            vector<Tile> neighbors = get_neighbors(current);
+            vector<Tile> neighbors;
+            neighbors = get_neighbors(current, neighbors);
             cout << "Neighbors of " << current << ": ";
             for (auto n : neighbors)
             {
@@ -422,7 +422,7 @@ private:
         board[x][y].player = player;
 
         // Need to update the Tiles in the edges representation
-        for (int i = 0; i < size * size; i++)
+        for (int i = 0; i < size * size + 4; i++)
         {
             for (int j = 0; j < edges[i].size(); j++)
             {
@@ -437,20 +437,28 @@ private:
     }
 
     // DFS to check if a player has won
-    bool dfs(Tile current, Tile end)
+    bool dfs(Tile current, Tile end, vector<pair<int, int>> visited)
     {
         assert(current.player != belongsTo::EMPTY);
         assert(current.player == end.player);
-        vector<Tile> neighbors(6);
+        vector<Tile> neighbors;
 
         if (current == end)
             return true;
 
-        neighbors = get_neighbors(current);
+        visited.push_back({current.x, current.y});
+
+        neighbors = get_neighbors(current, neighbors);
         for (Tile n : neighbors)
         {
-            if (dfs(n, end))
-                return true;
+            // Check if the neighbor has already been visited
+            if (find(visited.begin(), visited.end(), make_pair(n.x, n.y)) != visited.end())
+                continue;
+            else
+            {
+                if (dfs(n, end, visited))
+                    return true;
+            }
         }
 
         return false;
@@ -461,7 +469,10 @@ private:
     {
         if (currentPlayer == belongsTo::RED)
         {
-            if (dfs(north, south))
+            vector<pair<int, int>> visited;
+            visited = vector<pair<int, int>>(size * size + 4, {-1, -1});
+
+            if (dfs(north, south, visited))
             {
                 cout << "Red wins!" << endl;
                 return true;
