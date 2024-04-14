@@ -151,7 +151,7 @@ In Week 1, we delved into the following key topics:
 - Conversion of C code to C++.
 - Highlighting the significant differences and improvements of C++ over C.
 
-### Week 2
+### Week 2: 
 
 In Week 2, we explored the following topics:
 
@@ -161,7 +161,7 @@ In Week 2, we explored the following topics:
 - Learning about enums in C++ and how they provide a way to define a set of named integral constants representing enumerators.
 - An introductory session on graph theory, its significance, and basic concepts.
 
-### Week 3
+### Week 3: 
 
 In Week 3 we explored the following topics:
 - Deep-dive into classes in C++
@@ -169,7 +169,7 @@ In Week 3 we explored the following topics:
 - Introduction to priority queues
 - Homework which combined all the concepts above
 
-### Week 4
+### Week 4: 
 
 In Week 4 we explored the following topics:
 - Minimal Spanning Tree Algorithms
@@ -179,11 +179,11 @@ In Week 4 we explored the following topics:
 - STL Iterators
 - STL Algorithms
 
-### Week 5
+### Week 5: Exam
 Only the exam was done in this week
 - Exam
 
-### Week 6 Start of Course B
+### Week 6: Start of Course B
 
 Week 6 started course B of the last leg of the Course. This week covered: 
 - Deeper dive into the STL
@@ -191,3 +191,9 @@ Week 6 started course B of the last leg of the Course. This week covered:
 - Deep dive into iterator types and their differences
 - Deep dive into algorithms
 - Introduction to Lambda expressions/functions
+
+### Week 7: Game of Hex
+
+Week 7 contains the rest of the Assignments since they all relate to the game of Hex
+- Implement Game of Hex
+- Implement Smart AI opponent
