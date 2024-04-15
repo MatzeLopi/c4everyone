@@ -71,6 +71,12 @@ bool operator==(const Tile &lhs, const Tile &rhs)
     return lhs.x == rhs.x && lhs.y == rhs.y && lhs.player == rhs.player;
 }
 
+// Operator overload for !=
+bool operator!=(const Tile &lhs, const Tile &rhs)
+{
+    return !(lhs == rhs);
+}
+
 class Hex
 {
 public:
@@ -340,7 +346,18 @@ public:
     }
 
 private:
-    vector<Tile> get_neighbors(Tile tile, vector<Tile> neighbors)
+    /**
+     * @brief Gets the neighbors of a Tile.
+     *
+     * This function gets the neighbors of a Tile based on the edges representation of the board.
+     * It returns the neighbors of the Tile that have the same player as the Tile.
+     *
+     * @param tile The Tile for which to get the neighbors.
+     * @param neighbors The list of neighbors.
+     *
+     * @return The neighbors of the Tile.
+     */
+    vector<Tile> get_neighbors(Tile tile, vector<Tile> neighbors, bool ignoreNSWE = false)
     {
         int index;
         if (tile.x > size || tile.y > size)
@@ -352,15 +369,34 @@ private:
 
         for (auto n : potential_neighbors)
         {
-            if (n.player == tile.player)
-                neighbors.push_back(n);
+            if (ignoreNSWE)
+            {
+                if (n.player == tile.player && n != north && n != south && n != west && n != east)
+                    neighbors.push_back(n);
+                else
+                    continue;
+            }
             else
-                continue;
+            {
+                if (n.player == tile.player)
+                    neighbors.push_back(n);
+                else
+                    continue;
+            }
         }
         return neighbors;
     }
 
-    // Game loop for the Hex game
+    /**
+     * @brief Game loop.
+     *
+     * This function is the main game loop for the Hex game.
+     * It alternates between the human player and the AI player until a winner is found.
+     * The human player makes a make_move by entering the x and y coordinates of the move.
+     * The AI player makes a move by performing a lookahead search based on alpha-beta pruning.
+     * The game ends when a player wins.
+     *
+     */
     void game_loop()
     {
         while (!check_winner())
@@ -387,7 +423,7 @@ private:
                 cout << "Player " << currentPlayer << " turn" << endl;
                 cin >> x >> y;
 
-                while (move(x, y, currentPlayer) == false)
+                while (make_move(x, y, currentPlayer) == false)
                 {
                     cout << "Invalid move" << endl;
                     cin >> x >> y;
@@ -409,7 +445,7 @@ private:
      *
      * @return True if the move is valid, false otherwise.
      */
-    bool move(int x, int y, belongsTo player)
+    bool make_move(int x, int y, belongsTo player)
     {
         if (x < 0 || x >= size || y < 0 || y >= size || board[x][y].player != belongsTo::EMPTY)
             return false;
@@ -422,12 +458,22 @@ private:
         }
     }
 
-    // Set Node to player
+    /**
+     * @brief Sets a node on the board.
+     *
+     * This function sets a node on the board at the specified position (x, y) for the specified player.
+     * It updates the board and the edges representation of the board.
+     *
+     * @param x The x-coordinate of the node.
+     * @param y The y-coordinate of the node.
+     * @param player The player of the node.
+     *
+     * @return void
+     */
     void set_node(int x, int y, belongsTo player)
     {
         board[x][y].player = player;
 
-        // Need to update the Tiles in the edges representation
         for (int i = 0; i < size * size + 4; i++)
         {
             for (int j = 0; j < edges[i].size(); j++)
@@ -444,6 +490,31 @@ private:
     }
 
     /**
+     * @brief Undoes a move on the board.
+     *
+     * This function undoes a move on the board at the specified position (x, y).
+     *
+     * @param x The x-coordinate of the move.
+     * @param y The y-coordinate of the move.
+     */
+    void undo_move(int x, int y)
+    {
+        board[x][y].player = belongsTo::EMPTY;
+        for (int i = 0; i < size * size + 4; i++)
+        {
+            for (int j = 0; j < edges[i].size(); j++)
+            {
+                if (edges[i][j].x == x && edges[i][j].y == y)
+                {
+                    edges[i][j].player = belongsTo::EMPTY;
+                }
+            }
+        }
+        round--;
+        update_player();
+    }
+
+    /**
      * @brief Depth-first search to check if a player has won.
      *
      * This function performs a depth-first search to check if a player has won the game.
@@ -454,7 +525,7 @@ private:
      *
      * @return True if the player has won, false otherwise.
      */
-    bool dfs(Tile current, Tile end, vector<pair<int, int>> visited)
+    bool dfs(Tile current, Tile end, vector<pair<int, int>> visited, bool ignoreNSWE = false)
     {
         assert(current.player != belongsTo::EMPTY);
         assert(current.player == end.player);
@@ -465,7 +536,7 @@ private:
 
         visited.push_back({current.x, current.y});
 
-        neighbors = get_neighbors(current, neighbors);
+        neighbors = get_neighbors(current, neighbors, ignoreNSWE);
         for (Tile n : neighbors)
         {
             // Check if the neighbor has already been visited
@@ -489,7 +560,7 @@ private:
      *
      * @return True if a player has won, false otherwise.
      */
-    bool check_winner()
+    bool check_winner(bool simulation = false)
     {
 
         vector<pair<int, int>> visited_red;
@@ -497,9 +568,17 @@ private:
 
         if (dfs(north, south, visited_red))
         {
-            cout << "Red wins!" << endl;
-            currentPlayer = belongsTo::RED;
-            return true;
+            if (simulation)
+            {
+                currentPlayer = belongsTo::RED;
+                return true;
+            }
+            else
+            {
+                cout << "Red wins!" << endl;
+                currentPlayer = belongsTo::RED;
+                return true;
+            }
         }
 
         vector<pair<int, int>> visited_blue;
@@ -507,15 +586,220 @@ private:
 
         if (dfs(west, east, visited_blue))
         {
-            cout << "Blue wins!" << endl;
-            currentPlayer = belongsTo::BLUE;
-            return true;
+            if (simulation)
+            {
+                currentPlayer = belongsTo::BLUE;
+                return true;
+            }
+            else
+            {
+                cout << "Blue wins!" << endl;
+                currentPlayer = belongsTo::BLUE;
+                return true;
+            }
         }
 
         return false;
     }
 
-    // TODO Implement lookahead based on a minimax algorithm
+    /**
+     * @brief Gets the tiles of a player on the board.
+     *
+     * This function gets the tiles of a player on the board.
+     *
+     * @param player The player for which to get the tiles.
+     *
+     * @return The tiles of the player.
+     */
+    vector<Tile> get_player_tiles(belongsTo player)
+    {
+        vector<Tile> player_tiles;
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (board[i][j].player == player)
+                {
+                    player_tiles.push_back(board[i][j]);
+                }
+            }
+        }
+        return player_tiles;
+    }
+
+    /**
+     * @brief Gets the longest path of a player on the board.
+     *
+     * This function calculates the longest path of a player on the board by performing a depth-first search from each node of the player.
+     * It returns the length of the longest path.
+     *
+     * @param player The player for which to calculate the longest path.
+     *
+     * @return The length of the longest path of the player.
+     */
+    int get_longest_path(belongsTo player)
+    {
+        int longest_path = 0;
+        vector<pair<int, int>> visited;
+        vector<Tile> neighbors;
+        for (int i = 0; i < size; i++)
+        {
+            for (int j = 0; j < size; j++)
+            {
+                if (board[i][j].player == player)
+                {
+                    Tile current = board[i][j];
+                    neighbors = get_neighbors(current, neighbors, true);
+                    for (Tile tile : neighbors)
+                    {
+                        if (tile.player == player)
+                        {
+                            if (dfs(tile, current, visited, true))
+                            {
+                                longest_path++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        cout << longest_path << endl;
+        return longest_path;
+    }
+
+    /**
+     * @brief Evaluates a node using the minimax algorithm with alpha-beta pruning.
+     *
+     * This function evaluates a node using the minimax algorithm with alpha-beta pruning.
+     * It recursively evaluates the node based on the specified depth and returns the score of the node.
+     * The score is calculated as the difference between the longest path of the AI player and the longest path of the human player.
+     *
+     * @param tile The current Tile being evaluated.
+     * @param depth The depth of the node in the search tree.
+     * @param alpha The alpha value for alpha-beta pruning.
+     * @param beta The beta value for alpha-beta pruning.
+     * @param maximizingPlayer The maximizing player in the search tree.
+     *
+     */
+    int evaluate_node(Tile tile, int depth, int alpha, int beta, bool maximizingPlayer)
+    {
+        vector<pair<int, int>> reasonableMoves; // Initialize the set of reasonable moves
+
+        // Check if the depth is 0 or the game has ended
+        if (depth == 0)
+        {
+            return get_longest_path(ai_player) - get_longest_path(human_player);
+        }
+        else if (check_winner(true))
+        {
+            return 1000;
+        }
+
+        vector<pair<int, int>> moves;
+        vector<Tile> neighbors(6);
+        neighbors = get_neighbors(tile, neighbors);
+
+        // Iterate over the neighbors of the current tile -> If tile is empty add to moves
+        for (Tile n : neighbors)
+        {
+            if (n.player == belongsTo::EMPTY)
+            {
+                moves.push_back({n.x, n.y});
+            }
+        }
+        int eval;
+
+        // Check if max agent
+        if (maximizingPlayer)
+        {
+
+            for (auto move : moves)
+            {
+                // Make the move
+                make_move(move.first, move.second, ai_player);
+
+                // Update Tile
+                tile = board[move.first][move.second];
+
+                // Recursively evaluate the node
+                eval = evaluate_node(tile, depth - 1, alpha, beta, false);
+
+                // Undo the move
+                undo_move(move.first, move.second);
+
+                // Perform alpha-beta pruning
+                alpha = max(alpha, eval);
+                if (beta <= alpha)
+                    break;
+            }
+            return eval;
+        }
+        // Check if min agent
+        else
+        {
+            for (auto move : moves)
+            {
+                // Make the move
+                make_move(move.first, move.second, human_player);
+
+                // Update Tile
+                tile = board[move.first][move.second];
+
+                // Recursively evaluate the node
+                eval = evaluate_node(tile, depth - 1, alpha, beta, true);
+
+                // Undo the move
+                undo_move(move.first, move.second);
+
+                // Perform alpha-beta pruning
+                beta = min(beta, eval);
+                if (beta <= alpha)
+                    break;
+            }
+            return eval;
+        }
+    }
+
+    /**
+     * @brief Gets the reasonable moves for the AI player.
+     *
+     * This function gets the reasonable moves for the AI player based on the evaluation of the nodes using the minimax algorithm with alpha-beta pruning.
+     * It evaluates each node and selects the moves with the highest score.
+     *
+     * @return The reasonable moves for the AI player.
+     */
+    vector<pair<int, int>> get_reasonable_move()
+    {
+        vector<pair<int, int>> legalMoves = get_legal_moves(); // Get all legal moves
+        vector<pair<int, int>> reasonableMoves;                // Initialize the set of reasonable moves
+        map<int, pair<int, int>> moveScores;                   // Initialize the map of move scores
+
+        // Evaluate each move
+        for (auto move : legalMoves)
+        {
+            // Make the move
+            make_move(move.first, move.second, ai_player);
+
+            // Evaluate the node
+            int eval = evaluate_node(board[move.first][move.second], 2, INT_MIN, INT_MAX, false);
+
+            // Add the move to the set of reasonable moves
+            moveScores[eval] = move;
+
+            // Undo the move
+            undo_move(move.first, move.second);
+        }
+        // Add the first 10 moves with the highest scores to the set of reasonable moves
+        int count = 0;
+        for (auto it = moveScores.rbegin(); it != moveScores.rend(); it++)
+        {
+            if (count == 10)
+                break;
+            reasonableMoves.push_back(it->second);
+            count++;
+        }
+        return reasonableMoves;
+    }
 
     /**
      * @brief Monte Carlo simulation to find the best move.
@@ -529,7 +813,7 @@ private:
     pair<int, int> monte_carlo_simulation()
     {
         // Perform Monte Carlo simulation to find the best move
-        vector<pair<int, int>> legalMoves = get_legal_moves(); // Get all legal moves
+        vector<pair<int, int>> legalMoves = get_reasonable_move(); // Get all legal moves
 
         // Initialize variables to keep track of the best move
         int bestScore = INT_MIN;
@@ -543,13 +827,13 @@ private:
             // Simulate the game for each move
             for (int i = 0; i < simulations; i++)
             {
-                Hex tempHex(*this);                                   // Create a copy of the current Hex object
-                tempHex.move(move.first, move.second, currentPlayer); // Make move on the copy
+                Hex tempHex(*this);                                        // Create a copy of the current Hex object
+                tempHex.make_move(move.first, move.second, currentPlayer); // Make move on the copy
 
                 // Perform random moves until the game ends
-                while (!tempHex.check_winner())
+                while (!tempHex.check_winner(true))
                 {
-                    vector<pair<int, int>> tempLegalMoves = tempHex.get_legal_moves();
+                    vector<pair<int, int>> tempLegalMoves = tempHex.get_reasonable_move();
                     if (tempLegalMoves.size() == 0)
                     {
                         break;
@@ -557,7 +841,7 @@ private:
                     int randomIndex = generate_random_int(0, tempLegalMoves.size() - 1);
                     pair<int, int> randomMove = tempLegalMoves[randomIndex];
 
-                    tempHex.move(randomMove.first, randomMove.second, tempHex.currentPlayer);
+                    tempHex.make_move(randomMove.first, randomMove.second, tempHex.currentPlayer);
                 }
 
                 // Calculate the score based on the result of the game
@@ -579,7 +863,13 @@ private:
         return {bestMove.first, bestMove.second};
     }
 
-    // Function to get all legal moves
+    /**
+     * @brief Gets the legal moves on the board.
+     *
+     * This function gets the legal moves on the board.
+     *
+     * @return The legal moves on the board.
+     */
     vector<pair<int, int>> get_legal_moves()
     {
         vector<pair<int, int>> legalMoves;
@@ -598,7 +888,15 @@ private:
         return legalMoves;
     }
 
-    // Function to make an AI move
+    /**
+     * @brief AI move.
+     *
+     * This function makes a move for the AI player.
+     * It uses the Monte Carlo simulation to find the best move for the AI player.
+     * It then makes the move on the board.
+     *
+     * @return void
+     */
     void ai_move()
     {
         // Function to make an AI move
@@ -614,11 +912,22 @@ private:
         else
         {
             pair<int, int> best_move = monte_carlo_simulation();
-            move(best_move.first, best_move.second, currentPlayer);
+            make_move(best_move.first, best_move.second, currentPlayer);
         }
     }
 
-    // Function to implement the pi rule
+    /**
+     * @brief Pi rule.
+     *
+     * This function implements the Pi rule, which allows the human player to change sides with the AI player.
+     * The human player can choose to change sides with the AI player or not.
+     * If the human player chooses to change sides, the players are swapped.
+     *
+     * @param choice The choice of the human player.
+     * @param ai Whether the AI player is making the move.
+     *
+     * @return void
+     */
     void pi_rule(char choice = 'N', bool ai = false)
     {
         if (!ai)
