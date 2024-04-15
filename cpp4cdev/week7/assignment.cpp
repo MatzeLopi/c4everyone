@@ -10,9 +10,19 @@
 #include <random>
 
 using namespace std;
-const int simulations = 200;
+const int simulations = 100;
 
-// Function to generate a random integer in the range [min, max]
+/**
+ * @brief Generates a random integer between the specified range.
+ *
+ * This function generates a random integer between the specified range using the Mersenne Twister engine.
+ *
+ * @param min The minimum value of the range.
+ * @param max The maximum value of the range.
+ *
+ * @return The random integer.
+
+*/
 int generate_random_int(int min, int max)
 {
     random_device rd;
@@ -21,7 +31,12 @@ int generate_random_int(int min, int max)
     return dis(gen);
 }
 
-// Enum class to represent the player
+/**
+ * @brief Enum class to represent the player.
+ *
+ * This enum class represents the player as belonging to the Blue team, the Red team, or being empty.
+ *
+ */
 enum class belongsTo : short
 {
     BLUE,
@@ -29,7 +44,17 @@ enum class belongsTo : short
     EMPTY
 };
 
-// Output stream operator for belongsTo enum class
+/**
+ * @brief Output stream operator for belongsTo enum class.
+ *
+ * This function overloads the output stream operator for the belongsTo enum class.
+ * It prints the player as "B" for Blue, "R" for Red, and "." for Empty.
+ *
+ * @param os The output stream.
+ * @param belongs The player.
+ *
+ * @return The output stream.
+ */
 ostream &operator<<(ostream &os, belongsTo belongs)
 {
     switch (belongs)
@@ -50,7 +75,9 @@ ostream &operator<<(ostream &os, belongsTo belongs)
     return os;
 }
 
-// Struct to represent a tile
+/**
+ * @brief Struct to represent a Tile on the board.
+ */
 struct Tile
 {
     int x;
@@ -813,7 +840,7 @@ private:
     pair<int, int> monte_carlo_simulation()
     {
         // Perform Monte Carlo simulation to find the best move
-        vector<pair<int, int>> legalMoves = get_reasonable_move(); // Get all legal moves
+        vector<pair<int, int>> legalMoves = get_legal_moves(); // Get all legal moves
 
         // Initialize variables to keep track of the best move
         int bestScore = INT_MIN;
@@ -833,7 +860,7 @@ private:
                 // Perform random moves until the game ends
                 while (!tempHex.check_winner(true))
                 {
-                    vector<pair<int, int>> tempLegalMoves = tempHex.get_reasonable_move();
+                    vector<pair<int, int>> tempLegalMoves = tempHex.get_legal_moves();
                     if (tempLegalMoves.size() == 0)
                     {
                         break;
