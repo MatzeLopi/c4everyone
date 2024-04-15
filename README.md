@@ -10,6 +10,8 @@ I embarked on this journey to delve deeper into the world of programming and bro
 
 The C and C++ Programming Specialization provided a comprehensive introduction to these languages, covering fundamental concepts, data structures, algorithms, and best practices. Through a series of hands-on projects and assignments, I gained practical experience and honed my problem-solving skills.
 
+The end of the course focussed on Graph theory and AI which I learned much about.
+
 ## Repository Contents
 
 - **Fundamentals:** Here you will find my solutions to the assignments of the first course in the series, fundamentals.
@@ -195,5 +197,6 @@ Week 6 started course B of the last leg of the Course. This week covered:
 ### Week 7: Game of Hex
 
 Week 7 contains the rest of the Assignments since they all relate to the game of Hex
-- Implement Game of Hex
-- Implement Smart AI opponent
+- Implement Game of Hex and use Graph Theory to play it.
+- Implement Smart AI opponent. 
+- Use Monte Carlo Simulation to generate Smart AI agent. 
