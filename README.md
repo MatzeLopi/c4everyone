@@ -171,7 +171,7 @@ In Week 3 we explored the following topics:
 - Introduction to priority queues
 - Homework which combined all the concepts above
 
-### Week 4: 
+### Week 4 More Graph Theory: 
 
 In Week 4 we explored the following topics:
 - Minimal Spanning Tree Algorithms
@@ -196,7 +196,27 @@ Week 6 started course B of the last leg of the Course. This week covered:
 
 ### Week 7: Game of Hex
 
-Week 7 contains the rest of the Assignments since they all relate to the game of Hex
-- Implement Game of Hex and use Graph Theory to play it.
-- Implement Smart AI opponent. 
-- Use Monte Carlo Simulation to generate Smart AI agent. 
+In Week 7, we focused on the game of Hex and its implementation using graph theory. Here's what we covered:
+
+#### Implementing Game of Hex:
+
+- We implemented the game of Hex, a two-player strategy board game.
+- The game involved creating a hexagonal grid and allowing players to place their stones on the grid.
+- The objective of the game was to create a connected path of stones from one side of the board to the opposite side.
+
+#### Using Graph Theory:
+
+- We utilized graph theory concepts to represent the game board and the connections between the stones.
+- Graph theory allowed us to efficiently determine the winning condition and check for connected paths.
+
+#### Implementing a Smart AI Opponent:
+
+- We implemented a smart AI opponent for the game of Hex.
+- The AI opponent utilized various strategies and algorithms to make intelligent moves and compete against human players.
+
+#### Monte Carlo Simulation:
+
+- We used Monte Carlo simulation to generate a smart AI agent for the game of Hex.
+- Monte Carlo simulation involved running multiple random simulations of the game to determine the best move in a given situation.
+
+Overall, Week 7 provided an exciting opportunity to apply graph theory, implement the game of Hex, and create intelligent AI opponents using various strategies and algorithms.
